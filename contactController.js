@@ -1,9 +1,64 @@
 // contactController.js
 // Import contact model
 Contact = require('./contactModel');
+
+exports.authUser =  (id, password, callback) =>{
+    console.log('input id :' + id.toString() + '  :  pw : ' + password);
+ 
+    //cmd 에서 db.users  로 썻던 부분이 있는데 이때 이 컬럼(테이블)에 접근은 다음처럼 한다
+    Contact.get((err, contacts)=>{
+        var data = contacts.map(result=>
+           {
+               if(id === result.email){
+                   console.log('That is')
+                   if(password === result.password){
+                       console.log('that is correct')
+                   }
+                   console.log("That is incorrect")
+               }
+
+               else{
+                   console.log("There is no users")
+               }
+           }
+            )
+    
+    })
+    //찾고자 하는 정보를 입력해준다
+    //var result = users.find({ name: id, passwords: password });
+    //var result = users.find({ "name": id, "passwords":password });
+    //var result = users.find({ "name": id , "passwords": password });
+    //var result = users.find({});
+ 
+    // var result = users.find({ "name": id, "email": password });
+ 
+    result.toArray(
+        function (err, docs) {
+            if (err) {
+                callback(err, null);
+                return;
+            }
+ 
+            if (docs.length > 0) {
+                console.log('find user [ ' + docs + ' ]');
+                callback(null, docs);
+            }
+            else {
+                console.log('can not find user [ ' + docs + ' ]');
+                callback(null, null);
+            }
+        }
+ 
+    );
+ 
+};
+
 // Handle index actions
-exports.index = function (req, res) {
-    Contact.get(function (err, contacts) {
+exports.index = async (req, res)=> {
+   
+   Contact.get((err, contacts)=> {
+
+        
         if (err) {
             res.json({
                 status: "error",
@@ -17,15 +72,18 @@ exports.index = function (req, res) {
         });
     });
 };
+
+
 // Handle create contact actions
-exports.new = function (req, res) {
+exports.new = (req, res)=> {
     var contact = new Contact();
     contact.name = req.body.name ? req.body.name : contact.name;
     contact.gender = req.body.gender;
     contact.email = req.body.email;
+    contact.password = req.body.password;
     contact.phone = req.body.phone;
 // save the contact and check for errors
-    contact.save(function (err) {
+    contact.save((err) =>{
         // Check for validation error
         if (err)
             res.json(err);
@@ -36,9 +94,25 @@ exports.new = function (req, res) {
             });
     });
 };
+
+// Handle login
+
+exports.login = (req, res)=>{
+    email = req.body.id
+    password = req.body.passwords
+    Contact.find({"email":req.body.id , "password":req.body.passwords},  (err, contact) =>{
+        console.log(contact)
+        if (err)
+            res.send(err);
+        res.json({
+            message: 'Contact details loading..',
+            data: contact
+        });
+    });
+}
 // Handle view contact info
-exports.view = function (req, res) {
-    Contact.findById(req.params.contact_id, function (err, contact) {
+exports.view =  (req, res)=> {
+    Contact.findById(req.params.contact_id,  (err, contact) =>{
         if (err)
             res.send(err);
         res.json({
@@ -48,16 +122,17 @@ exports.view = function (req, res) {
     });
 };
 // Handle update contact info
-exports.update = function (req, res) {
-    Contact.findById(req.params.contact_id, function (err, contact) {
+exports.update =  (req, res)=> {
+    Contact.findById(req.params.contact_id,  (err, contact)=> {
         if (err)
             res.send(err);
         contact.name = req.body.name ? req.body.name : contact.name;
         contact.gender = req.body.gender;
         contact.email = req.body.email;
+        contact.password = req.body.password;
         contact.phone = req.body.phone;
 // save the contact and check for errors
-        contact.save(function (err) {
+        contact.save( (err)=> {
             if (err)
                 res.json(err);
             res.json({
@@ -68,10 +143,10 @@ exports.update = function (req, res) {
     });
 };
 // Handle delete contact
-exports.delete = function (req, res) {
+exports.delete =  (req, res)=> {
     Contact.remove({
         _id: req.params.contact_id
-    }, function (err, contact) {
+    },  (err, contact)=>{
         if (err)
             res.send(err);
         res.json({

@@ -10,6 +10,7 @@ var contactSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    password:String,
     gender: String,
     phone: String,
     create_date: {

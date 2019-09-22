@@ -9,11 +9,16 @@ let app = express();
 
 // Import routes
 let apiRoutes = require("./api-routes");
+
+app.set('views', __dirname+'/views');
+app.set('view engine', 'ejs');
+app.set('html', require('ejs').renderFile);
 // Configure bodyparser to handle post requests
 app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(bodyParser.json());
+
 // Connect to Mongoose and set connection variable
 mongoose.connect('mongodb+srv://root:1234@cluster0-tecvg.mongodb.net/test?retryWrites=true&w=majority', { useNewUrlParser: true});
 
